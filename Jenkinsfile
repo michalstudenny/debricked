@@ -1,9 +1,7 @@
 pipeline {
-
-    agent none
+    agent any
     
     stages {
-        
         stage('Build') {
             steps {
                 sh 'mvn clean package'
@@ -15,37 +13,11 @@ pipeline {
                 sh 'mvn test'
             }
         }
-
-        stage('Vulnerability scan') {
-
-            environment {
-
-                DEBRICKED_TOKEN = credentials('DEBRICKED_TOKEN')
-
-            }
-
-
-
-            agent {
-
-                docker {
-
-                    image 'debricked/debricked-cli'
-
-                    args '--entrypoint="" -v ${WORKSPACE}:/data -w /data'
-
-                }
-
-            }
-
+        
+        stage('Deploy') {
             steps {
-
-                sh 'bash /home/entrypoint.sh debricked:scan "" "$DEBRICKED_TOKEN" example-jenkins "$GIT_COMMIT" null cli'
-
+                sh 'mvn deploy'
             }
-
         }
-
     }
-
 }
